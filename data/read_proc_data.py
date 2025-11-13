@@ -13,7 +13,15 @@ def get_data_summary(root: str) -> Tuple[int, int]:
     return num_users, num_items
 
 
-def load_proc_data(root: str) -> Tuple[List[Tuple[int, int]], int, int]:
+def load_proc_data(
+    root: str,
+) -> Tuple[
+    List[Tuple[int, int]],
+    List[Tuple[int, int]],
+    Dict[int, Set[int]],
+    Dict[int, Set[int]],
+]:
+    interactions: List[Tuple[int, int]] = []
     train: List[Tuple[int, int]] = []
     val: Dict[int, Set[int]] = {}
     path = os.path.join(root, "train.tsv")
@@ -21,7 +29,9 @@ def load_proc_data(root: str) -> Tuple[List[Tuple[int, int]], int, int]:
         f.readline()
         for line in f:
             user_procid, item_procid = line.strip().split("\t")
-            if random() > 0.9:
+            user_procid, item_procid = int(user_procid), int(item_procid)
+            interactions.append((user_procid, item_procid))
+            if random() > 0.1:
                 train.append((user_procid, item_procid))
             elif user_procid in val:
                 val[user_procid].add(item_procid)
@@ -34,9 +44,11 @@ def load_proc_data(root: str) -> Tuple[List[Tuple[int, int]], int, int]:
         f.readline()
         for line in f:
             user_procid, item_procid = line.strip().split("\t")
+            user_procid, item_procid = int(user_procid), int(item_procid)
+            interactions.append((user_procid, item_procid))
             if user_procid in test:
                 test[user_procid].add(item_procid)
             else:
                 test[user_procid] = {item_procid}
 
-    return train, val, test
+    return interactions, train, val, test
